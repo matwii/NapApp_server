@@ -5,6 +5,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const connection = require('./database')
 
+
 // support parsing of application/json type post data
 app.use(bodyParser.json());
 
@@ -63,5 +64,5 @@ app.route('/ride')
 app.get('/', (req, res) => res.send('Working!'));
 
 // Port 8080 for Google App Engine
-app.set('port', process.env.PORT || 3000);
-app.listen(3000);
+app.set('port', process.env.PORT || 8080);
+app.listen(8080);
