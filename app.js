@@ -3,7 +3,10 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
-const connection = require('./database')
+const connection = require('./database');
+const passport = require('passport');
+const { generateToken, sendToken } = require('./utils/token.utils');
+require('./passport')();
 
 
 // support parsing of application/json type post data
@@ -20,8 +23,9 @@ app.route('/car')
                 if (error) throw error;
                 res.send(results);
             }
-        );
+        )
     });
+
 
 app.route('/car/:id')
     .put(function (req, res, next) {
@@ -60,6 +64,17 @@ app.route('/ride')
             res.send("successfully added ride " + result.affectedRows);
         });
     });
+
+app.route('/auth/google')
+    .post(passport.authenticate('google-token', {session: false}), function(req, res, next) {
+        if (!req.user) {
+            return res.send(401, 'User Not Authenticated');
+        }
+        req.auth = {
+            id: req.user.google_id
+        };
+        next();
+    }, generateToken, sendToken);
 
 app.get('/', (req, res) => res.send('Working!'));
 
