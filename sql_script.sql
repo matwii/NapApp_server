@@ -22,10 +22,6 @@ UPDATE car
 SET booked=0
 WHERE car_id=2;
 
-update user
-SET password='$2a$10$4rePJcP5EI5uTWrFXNifqeRYD81CqXApG6GGjjf1tHARtSRUp.hg.'
-WHERE user_id=1;
-
 SELECT car.reg_number, car.brand, car.modell, ride.booked_time
 FROM car
 INNER JOIN ride ON car.car_id=ride.car_id
@@ -42,9 +38,6 @@ VALUES(1, 'admin');
 
 INSERT INTO role 
 VALUES(2, 'user');
-
-INSERT INTO user
-values(1, 'maatzulol@gmail.com', '$2a$10$4rePJcP5EI5uTWrFXNifqeRYD81CqXApG6GGjjf1tHARtSRUp.hg.', 'Matz Wiik', null, null, null, NOW(), 1);
 
 
 
