@@ -5,6 +5,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const connection = require('./database');
 const passport = require('passport');
+const bcrypt = require('bcrypt-nodejs');
 const { generateToken, sendToken } = require('./utils/token.utils');
 require('./passport')();
 
@@ -55,7 +56,8 @@ app.route('/ride')
             via_time: via_time,
             end_latitude: end_latitude,
             end_longitude: end_longitude,
-            end_time: end_time
+            end_time: end_time,
+            booked_time: new Date().toLocaleString()
         };
         console.log(req.body);
         connection.query(sql, values, function (err, result) {
@@ -76,8 +78,21 @@ app.route('/auth/google')
         next();
     }, generateToken, sendToken);
 
+app.route('/auth/login')
+    .post(passport.authenticate('local-login', {
+        session: false
+    }), function(req, res, next) {
+        if (!req.user) {
+            return res.send(401, 'User Not Authenticated');
+        }
+        req.auth = {
+            id: req.user.user_id
+        };
+        next();
+    }, generateToken, sendToken);
+
 app.get('/', (req, res) => res.send('Working!'));
 
 // Port 8080 for Google App Engine
-app.set('port', process.env.PORT || 8080);
-app.listen(8080);
+app.set('port', process.env.PORT || 3000);
+app.listen(3000);

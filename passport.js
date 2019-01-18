@@ -1,6 +1,8 @@
 var passport = require('passport');
 var GoogleTokenStrategy = require('passport-google-token').Strategy;
-const connection = require('./database')
+var LocalStrategy = require('passport-local').Strategy;
+const connection = require('./database');
+var bcrypt = require('bcrypt-nodejs');
 
 module.exports = function () {
     passport.use(new GoogleTokenStrategy({
@@ -35,4 +37,35 @@ module.exports = function () {
                 }
             })
         }));
-}
+    // =========================================================================
+    // LOCAL LOGIN =============================================================
+    // =========================================================================
+    // we are using named strategies since we have one for login and one for signup
+    // by default, if there was no name, it would just be called 'local'
+    passport.use(
+        'local-login',
+        new LocalStrategy({
+                // by default, local strategy uses username and password, we will override with email
+                usernameField : 'email',
+                passwordField : 'password',
+                passReqToCallback : true // allows us to pass back the entire request to the callback
+            },
+            async function(req, email, password, done) { // callback with email and password from our form
+
+                connection.query("SELECT * FROM user WHERE email = ?",[email], function(err, rows){
+                    if (err)
+                        return done(err);
+                    if (!rows.length) {
+                        return done(null, false, 'No user found');
+                    }
+
+                    // if the user is found but the password is wrong
+                    if (!bcrypt.compareSync(password, rows[0].password))
+                        return done(null, false, 'Incorrect password.'); // create the loginMessage and save it to session as flashdata
+
+                    // all is well, return successful user
+                    return done(null, rows[0]);
+                });
+            })
+    );
+};
