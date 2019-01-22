@@ -5,6 +5,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const connection = require('./database');
 const passport = require('passport');
+var cors = require('cors')
 const bcrypt = require('bcrypt-nodejs');
 const { generateToken, sendToken } = require('./utils/token.utils');
 require('./passport')();
@@ -15,6 +16,9 @@ app.use(bodyParser.json());
 
 //support parsing of application/x-www-form-urlencoded post data
 app.use(bodyParser.urlencoded({extended: true}));
+// Add headers
+
+app.use(cors())
 
 app.route('/car')
     .get(function (req, res, next) {

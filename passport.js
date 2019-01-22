@@ -51,7 +51,9 @@ module.exports = function () {
                 passReqToCallback : true // allows us to pass back the entire request to the callback
             },
             async function(req, email, password, done) { // callback with email and password from our form
-
+                let salt = await bcrypt.genSaltSync(10)
+                let hash = await bcrypt.hashSync('Paraply96', salt, null);
+                console.log(hash);
                 connection.query("SELECT * FROM user WHERE email = ?",[email], function(err, rows){
                     if (err)
                         return done(err);
