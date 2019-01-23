@@ -2,7 +2,8 @@ const jwt = require('jsonwebtoken');
 
 const createToken = function(auth) {
     return jwt.sign({
-            id: auth.id
+            id: auth.id,
+            role: auth.role
         }, process.env.JWT_SECRET);
 };
 
@@ -13,6 +14,11 @@ module.exports = {
     },
     sendToken: function(req, res) {
         res.setHeader('x-auth-token', req.token);
-        return res.status(200).send(JSON.stringify(req.token));
-    }
+        const user = {
+            email: req.user.email,
+            name: req.user.name,
+            token: req.token
+        };
+        return res.status(200).send(JSON.stringify(user));
+    },
 };

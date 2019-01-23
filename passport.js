@@ -51,17 +51,19 @@ module.exports = function () {
                 passReqToCallback : true // allows us to pass back the entire request to the callback
             },
             async function(req, email, password, done) { // callback with email and password from our form
-
                 connection.query("SELECT * FROM user WHERE email = ?",[email], function(err, rows){
                     if (err)
                         return done(err);
                     if (!rows.length) {
-                        return done(null, false, 'No user found');
+                        return done(null, false, { message: 'Incorrect username.' });
                     }
 
                     // if the user is found but the password is wrong
                     if (!bcrypt.compareSync(password, rows[0].password))
-                        return done(null, false, 'Incorrect password.'); // create the loginMessage and save it to session as flashdata
+                        return done(null, false, { message: 'Incorrect password.' }); // create the loginMessage and save it to session as flashdata
+
+                    if (rows[0].role_id !== 1)
+                        return done(null, false, {message: 'User is not admin'})
 
                     // all is well, return successful user
                     return done(null, rows[0]);

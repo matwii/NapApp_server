@@ -6,7 +6,9 @@ const bodyParser = require('body-parser');
 const connection = require('./database');
 const passport = require('passport');
 const bcrypt = require('bcrypt-nodejs');
-const { generateToken, sendToken } = require('./utils/token.utils');
+const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const {generateToken, sendToken, verifyAdmin} = require('./utils/token.utils');
 require('./passport')();
 
 
@@ -15,6 +17,12 @@ app.use(bodyParser.json());
 
 //support parsing of application/x-www-form-urlencoded post data
 app.use(bodyParser.urlencoded({extended: true}));
+
+const corsOptions = {
+    exposedHeaders: "x-auth-token",
+};
+
+app.use(cors(corsOptions));
 
 app.route('/car')
     .get(function (req, res, next) {
@@ -68,7 +76,7 @@ app.route('/ride')
     });
 
 app.route('/auth/google')
-    .post(passport.authenticate('google-token', {session: false}), function(req, res, next) {
+    .post(passport.authenticate('google-token', {session: false}), function (req, res, next) {
         if (!req.user) {
             return res.send(401, 'User Not Authenticated');
         }
@@ -80,13 +88,14 @@ app.route('/auth/google')
 
 app.route('/auth/login')
     .post(passport.authenticate('local-login', {
-        session: false
-    }), function(req, res, next) {
+        session: false,
+    }), function (req, res, next) {
         if (!req.user) {
             return res.send(401, 'User Not Authenticated');
         }
         req.auth = {
-            id: req.user.user_id
+            id: req.user.user_id,
+            role: req.user.role_id,
         };
         next();
     }, generateToken, sendToken);
@@ -95,4 +104,39 @@ app.get('/', (req, res) => res.send('Working!'));
 
 // Port 8080 for Google App Engine
 app.set('port', process.env.PORT || 3000);
-app.listen(3000);
+
+const server = app.listen(3000, function () {
+    console.log('server running on port 3000');
+});
+
+const io = require('socket.io')(server);
+
+let socketCount = 0;
+
+io.on('connection', function (socket) {
+    socketCount++;
+    console.log('Users connected ' + socketCount);
+    // Let all sockets know how many are connected
+    io.sockets.emit('users connected', socketCount);
+
+    socket.on('disconnect', function () {
+        // Decrease the socket count on a disconnect, emit
+        socketCount--;
+        console.log('Users connected ' + socketCount);
+        io.sockets.emit('users connected', socketCount)
+    });
+
+    if (socket.handshake.query && socket.handshake.query.token) {
+        jwt.verify(socket.handshake.query.token, process.env.JWT_SECRET, function (err, decoded) {
+            if (err) return new Error('Authentication error');
+            if (decoded.role === 1){
+                connection.query(
+                    "SELECT email, name, role_id, created FROM `user`",
+                    function (error, results, fields) {
+                        if (error) throw error;
+                        io.emit('initial users', results);
+                    })
+            }
+        })
+    }
+});
