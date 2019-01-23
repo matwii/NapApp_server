@@ -4,6 +4,7 @@
     <list default="true" id="d31c2824-5be5-484f-9d15-868124f6d2b8" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/app.js" afterDir="false" />
+<<<<<<< HEAD
       <change beforePath="$PROJECT_DIR$/node_modules/cors/CONTRIBUTING.md" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/cors/CONTRIBUTING.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/node_modules/cors/HISTORY.md" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/cors/HISTORY.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/node_modules/cors/LICENSE" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/cors/LICENSE" afterDir="false" />
@@ -14,6 +15,10 @@
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/passport.js" beforeDir="false" afterPath="$PROJECT_DIR$/passport.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/token.utils.js" beforeDir="false" afterPath="$PROJECT_DIR$/utils/token.utils.js" afterDir="false" />
+=======
+      <change beforePath="$PROJECT_DIR$/node_modules/cors/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/cors/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/passport.js" beforeDir="false" afterPath="$PROJECT_DIR$/passport.js" afterDir="false" />
+>>>>>>> c607568cd56732a8d016e651a328300c4cdeffe5
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -66,26 +71,26 @@
         <counts>
           <entry key="project.closed" value="1" />
           <entry key="project.open.time.0" value="2" />
-          <entry key="project.open.time.2" value="1" />
+          <entry key="project.open.time.2" value="2" />
           <entry key="project.open.time.3" value="1" />
           <entry key="project.open.time.4" value="1" />
           <entry key="project.open.time.8" value="1" />
-          <entry key="project.opened" value="6" />
+          <entry key="project.opened" value="7" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="env" value="71" />
-          <entry key="js" value="4962" />
+          <entry key="env" value="100" />
+          <entry key="js" value="5481" />
           <entry key="json" value="37" />
           <entry key="yaml" value="122" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key=".env file" value="62" />
+          <entry key=".env file" value="91" />
           <entry key="JSON" value="37" />
-          <entry key="JavaScript" value="4962" />
+          <entry key="JavaScript" value="5481" />
           <entry key="PLAIN_TEXT" value="9" />
           <entry key="YAML" value="122" />
         </counts>
@@ -156,17 +161,27 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/.env">
           <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
             <state relative-caret-position="68">
               <caret line="4" column="64" selection-start-line="4" selection-start-column="64" selection-end-line="4" selection-end-column="64" />
+=======
+            <state relative-caret-position="85">
+              <caret line="5" column="74" lean-forward="true" selection-start-line="5" selection-start-column="74" selection-end-line="5" selection-end-column="74" />
+>>>>>>> c607568cd56732a8d016e651a328300c4cdeffe5
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/passport.js">
           <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
             <state relative-caret-position="1003">
               <caret line="59" selection-start-line="59" selection-end-line="59" />
+=======
+            <state relative-caret-position="500">
+              <caret line="55" column="34" selection-start-line="55" selection-start-column="34" selection-end-line="55" selection-end-column="34" />
+>>>>>>> c607568cd56732a8d016e651a328300c4cdeffe5
             </state>
           </provider>
         </entry>
@@ -175,16 +190,25 @@
         <entry file="file://$PROJECT_DIR$/utils/token.utils.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="68">
+<<<<<<< HEAD
               <caret line="4" column="24" lean-forward="true" selection-start-line="4" selection-start-column="24" selection-end-line="4" selection-end-column="24" />
+=======
+              <caret line="4" column="23" selection-start-line="4" selection-start-column="23" selection-end-line="4" selection-end-column="23" />
+>>>>>>> c607568cd56732a8d016e651a328300c4cdeffe5
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app.js">
           <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
             <state relative-caret-position="1451">
               <caret line="123" column="22" lean-forward="true" selection-start-line="123" selection-start-column="22" selection-end-line="123" selection-end-column="22" />
+=======
+            <state relative-caret-position="432">
+              <caret line="82" column="21" lean-forward="true" selection-start-line="82" selection-start-column="21" selection-end-line="82" selection-end-column="21" />
+>>>>>>> c607568cd56732a8d016e651a328300c4cdeffe5
             </state>
           </provider>
         </entry>
@@ -192,8 +216,13 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/database.js">
           <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
             <state relative-caret-position="340">
               <caret line="20" column="39" lean-forward="true" selection-start-line="20" selection-start-column="39" selection-end-line="20" selection-end-column="39" />
+=======
+            <state relative-caret-position="357">
+              <caret line="21" column="37" selection-start-line="21" selection-start-column="37" selection-end-line="21" selection-end-column="37" />
+>>>>>>> c607568cd56732a8d016e651a328300c4cdeffe5
             </state>
           </provider>
         </entry>
@@ -251,10 +280,16 @@
         <option value="$PROJECT_DIR$/routes/authRoutes.js" />
         <option value="$PROJECT_DIR$/database.js" />
         <option value="$PROJECT_DIR$/config.js" />
+        <option value="$PROJECT_DIR$/utils/token.utils.js" />
         <option value="$PROJECT_DIR$/.env" />
+<<<<<<< HEAD
         <option value="$PROJECT_DIR$/passport.js" />
         <option value="$PROJECT_DIR$/utils/token.utils.js" />
         <option value="$PROJECT_DIR$/app.js" />
+=======
+        <option value="$PROJECT_DIR$/app.js" />
+        <option value="$PROJECT_DIR$/passport.js" />
+>>>>>>> c607568cd56732a8d016e651a328300c4cdeffe5
       </list>
     </option>
   </component>
@@ -275,10 +310,17 @@
     </packageJsonPaths>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
+<<<<<<< HEAD
     <option name="x" value="-9" />
     <option name="y" value="1071" />
     <option name="width" value="1938" />
     <option name="height" value="1098" />
+=======
+    <option name="x" value="-8" />
+    <option name="y" value="-8" />
+    <option name="width" value="1936" />
+    <option name="height" value="1056" />
+>>>>>>> c607568cd56732a8d016e651a328300c4cdeffe5
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -302,7 +344,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../nap-app-admin" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
   </component>
@@ -341,20 +383,29 @@
       <workItem from="1547125004801" duration="1632000" />
       <workItem from="1547545252217" duration="45000" />
       <workItem from="1547733648644" duration="2379000" />
+<<<<<<< HEAD
       <workItem from="1547803252156" duration="9064000" />
       <workItem from="1548150850501" duration="13703000" />
       <workItem from="1548240188761" duration="12087000" />
+=======
+      <workItem from="1547803252156" duration="8748000" />
+      <workItem from="1548069175327" duration="6298000" />
+>>>>>>> c607568cd56732a8d016e651a328300c4cdeffe5
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
+<<<<<<< HEAD
     <option name="totallyTimeSpent" value="129955000" />
+=======
+    <option name="totallyTimeSpent" value="110147000" />
+>>>>>>> c607568cd56732a8d016e651a328300c4cdeffe5
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="1073" width="1550" height="878" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.1870456" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.18703899" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="npm" order="2" side_tool="true" />
       <window_info id="Favorites" order="3" side_tool="true" />
@@ -393,7 +444,18 @@
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/.env">
+=======
+    <entry file="file://$PROJECT_DIR$/package.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="11" column="19" selection-start-line="11" selection-start-column="19" selection-end-line="11" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app.yaml">
+>>>>>>> c607568cd56732a8d016e651a328300c4cdeffe5
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
           <caret line="4" column="64" selection-start-line="4" selection-start-column="64" selection-end-line="4" selection-end-column="64" />
@@ -409,6 +471,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app.yaml">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
         <state relative-caret-position="119">
           <caret line="7" column="69" selection-start-line="7" selection-start-column="69" selection-end-line="7" selection-end-column="69" />
         </state>
@@ -432,20 +495,48 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="340">
           <caret line="20" column="39" lean-forward="true" selection-start-line="20" selection-start-column="39" selection-end-line="20" selection-end-column="39" />
+=======
+        <state relative-caret-position="357">
+          <caret line="21" column="37" selection-start-line="21" selection-start-column="37" selection-end-line="21" selection-end-column="37" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/utils/token.utils.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
-          <caret line="4" column="24" lean-forward="true" selection-start-line="4" selection-start-column="24" selection-end-line="4" selection-end-column="24" />
+          <caret line="4" column="23" selection-start-line="4" selection-start-column="23" selection-end-line="4" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.env">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="5" column="74" lean-forward="true" selection-start-line="5" selection-start-column="74" selection-end-line="5" selection-end-column="74" />
+>>>>>>> c607568cd56732a8d016e651a328300c4cdeffe5
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app.js">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
+        <state relative-caret-position="68">
+          <caret line="4" column="24" lean-forward="true" selection-start-line="4" selection-start-column="24" selection-end-line="4" selection-end-column="24" />
+=======
+        <state relative-caret-position="432">
+          <caret line="82" column="21" lean-forward="true" selection-start-line="82" selection-start-column="21" selection-end-line="82" selection-end-column="21" />
+>>>>>>> c607568cd56732a8d016e651a328300c4cdeffe5
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/passport.js">
+      <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
         <state relative-caret-position="1451">
           <caret line="123" column="22" lean-forward="true" selection-start-line="123" selection-start-column="22" selection-end-line="123" selection-end-column="22" />
+=======
+        <state relative-caret-position="500">
+          <caret line="55" column="34" selection-start-line="55" selection-start-column="34" selection-end-line="55" selection-end-column="34" />
+>>>>>>> c607568cd56732a8d016e651a328300c4cdeffe5
         </state>
       </provider>
     </entry>

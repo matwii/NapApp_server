@@ -8,7 +8,7 @@ const passport = require('passport');
 const bcrypt = require('bcrypt-nodejs');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-const {generateToken, sendToken, verifyAdmin} = require('./utils/token.utils');
+const {generateToken, sendToken} = require('./utils/token.utils');
 require('./passport')();
 
 
@@ -17,6 +17,9 @@ app.use(bodyParser.json());
 
 //support parsing of application/x-www-form-urlencoded post data
 app.use(bodyParser.urlencoded({extended: true}));
+// Add headers
+
+app.use(cors())
 
 const corsOptions = {
     exposedHeaders: "x-auth-token",
