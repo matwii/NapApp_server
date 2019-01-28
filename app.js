@@ -142,4 +142,18 @@ io.on('connection', function (socket) {
             }
         })
     }
+
+    connection.query(
+        "SELECT * FROM `car`",
+        function (error, results, fields) {
+            if (error) throw error;
+            io.emit('initial cars', results);
+        });
+
+    connection.query(
+        "SELECT * FROM `ride`",
+        function (error, results, fields) {
+            if (error) throw error;
+            io.emit('initial rides', results);
+        })
 });
