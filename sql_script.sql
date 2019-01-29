@@ -22,6 +22,9 @@ UPDATE car
 SET booked=0
 WHERE car_id=2;
 
+ALTER TABLE user
+ MODIFY created TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+
 SELECT car.reg_number, car.brand, car.modell, ride.booked_time
 FROM car
 INNER JOIN ride ON car.car_id=ride.car_id
@@ -31,6 +34,10 @@ CREATE TABLE role (
 	role_id int auto_increment,
     role_name varchar(20),
     PRIMARY KEY (role_id)
+);
+
+INSERT INTO user VALUES (	
+	null, 'test@test.no', 'test', 'test testersen', null, null, null, 2, now()
 );
 
 INSERT INTO role 

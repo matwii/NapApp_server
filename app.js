@@ -38,6 +38,21 @@ app.route('/car')
         )
     });
 
+app.route('/user/:id')
+    .delete(function (req, res, next) {
+        jwt.verify(req.body.token, process.env.JWT_SECRET, function (err, decoded) {
+            if (err) return new Error('Authentication error');
+            if (decoded.role === 1){
+                const sql = "DELETE FROM user WHERE user_id=?";
+                const { id } = req.params;
+                connection.query(sql, [id], function (err, result) {
+                    if (err) res.send('Error');
+                    res.send("Car booked successfully");
+                })
+            }
+        })
+    });
+
 
 app.route('/car/:id')
     .put(function (req, res, next) {
@@ -115,6 +130,7 @@ const server = app.listen(3000, function () {
 const io = require('socket.io')(server);
 
 let socketCount = 0;
+let initialUsers = [];
 
 io.on('connection', function (socket) {
     socketCount++;
@@ -132,13 +148,44 @@ io.on('connection', function (socket) {
     if (socket.handshake.query && socket.handshake.query.token) {
         jwt.verify(socket.handshake.query.token, process.env.JWT_SECRET, function (err, decoded) {
             if (err) return new Error('Authentication error');
+            //Checks to see if the user is admin.
             if (decoded.role === 1){
                 connection.query(
-                    "SELECT email, name, role_id, created FROM `user`",
+                    "SELECT user_id, email, name, role_id, created FROM `user`",
                     function (error, results, fields) {
                         if (error) throw error;
-                        io.emit('initial users', results);
+                        initialUsers = results;
+                        io.emit('initial users', initialUsers);
+                    });
+
+                socket.on('deleteUser', function (userId) {
+                    const sql = 'DELETE FROM user WHERE user_id=?';
+                    connection.query(sql, [userId], function (err, result) {
+                        if (err) throw err;
+                        initialUsers = initialUsers.filter(user => user.user_id !== userId);
+                        io.emit('initial users', initialUsers);
                     })
+                });
+                socket.on('addUser', function (user) {
+                    const sql = 'INSERT INTO user SET ?';
+                    const {name, email, password, role } = user;
+                    const values = {
+                        user_id: null,
+                        email,
+                        password,
+                        name,
+                        google_id: null,
+                        google_token: null,
+                        google_image: null,
+                        role_id: role,
+                        created: null
+                    };
+                    connection.query(sql, values, function (err, result) {
+                        if (err) throw err;
+                        initialUsers.push(user);
+                        io.emit('initial users', initialUsers);
+                    });
+                });
             }
         })
     }
