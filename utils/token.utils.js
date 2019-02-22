@@ -17,7 +17,8 @@ module.exports = {
         const user = {
             email: req.user.email,
             name: req.user.name,
-            token: req.token
+            token: req.token,
+            google_image: req.user.google_image
         };
         return res.status(200).send(JSON.stringify(user));
     },

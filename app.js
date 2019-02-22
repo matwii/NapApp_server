@@ -99,7 +99,9 @@ app.route('/auth/google')
             return res.send(401, 'User Not Authenticated');
         }
         req.auth = {
-            id: req.user.google_id
+            id: req.user.user_id,
+            role: req.user.role_id,
+
         };
         next();
     }, generateToken, sendToken);
@@ -166,13 +168,15 @@ io.on('connection', function (socket) {
                         io.emit('initial users', initialUsers);
                     })
                 });
-                socket.on('addUser', function (user) {
+                socket.on('addUser',async function (user) {
                     const sql = 'INSERT INTO user SET ?';
                     const {name, email, password, role } = user;
+                    const salt = await bcrypt.genSaltSync(10);
+                    const hashedPassword = await bcrypt.hashSync(password, salt);
                     const values = {
                         user_id: null,
                         email,
-                        password,
+                        password: hashedPassword,
                         name,
                         google_id: null,
                         google_token: null,
