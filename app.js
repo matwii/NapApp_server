@@ -136,14 +136,16 @@ let initialUsers = [];
 
 io.on('connection', function (socket) {
     socketCount++;
-    console.log('Users connected ' + socketCount);
+    //console.log('Users connected ' + socketCount);
+    console.log('A user connected')
     // Let all sockets know how many are connected
     io.sockets.emit('users connected', socketCount);
 
     socket.on('disconnect', function () {
         // Decrease the socket count on a disconnect, emit
         socketCount--;
-        console.log('Users connected ' + socketCount);
+        //console.log('Users connected ' + socketCount);
+        console.log('A user disconnected');
         io.sockets.emit('users connected', socketCount)
     });
 
@@ -196,9 +198,25 @@ io.on('connection', function (socket) {
 
     connection.query(
         "SELECT * FROM `car`",
-        function (error, results, fields) {
+        function (error, cars, fields) {
             if (error) throw error;
-            io.emit('initial cars', results);
+            const availableCars = [];
+            for (let i = 0; i < cars.length; i += 1) {
+                const car = cars[i];
+                // legg til if-en i php?
+                if (car.booked === 0) {
+                    const availableCar = {
+                        id: car.car_id,
+                        coordinate: {
+                            latitude: parseFloat(car.latitude),
+                            longitude: parseFloat(car.longitude),
+                        },
+                        regNr: car.reg_number,
+                    };
+                    availableCars.push(availableCar);
+                }
+            }
+            io.emit('initial cars', availableCars);
         });
 
     connection.query(
