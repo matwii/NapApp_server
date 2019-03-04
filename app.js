@@ -11,6 +11,11 @@ const jwt = require('jsonwebtoken');
 const {generateToken, sendToken} = require('./utils/token.utils');
 require('./passport')();
 
+let server;
+let io;
+let socketCount = 0;
+let initialUsers = [];
+let initialCars = [];
 
 // support parsing of application/json type post data
 app.use(bodyParser.json());
@@ -66,6 +71,18 @@ app.route('/car/:id')
         });
     });
 
+app.route('/car/:id')
+    .delete(function (req, res, next) {
+        const sql = "DELETE FROM `car` WHERE car_id=?";
+        const {id} = req.params;
+        connection.query(sql, [id], function (err, result) {
+            if (err) return res.send(400, err.sqlMessage);
+            initialCars = initialCars.filter(car => car.car_id !== parseInt(id));
+            res.send('Car deleted successfully');
+            io.emit('initial cars', initialCars);
+        })
+    });
+
 app.route('/ride')
     .post(function (req, res, next) {
         const sql = 'INSERT INTO ride SET ?';
@@ -91,6 +108,19 @@ app.route('/ride')
             console.log("successfully added ride");
             res.send("successfully added ride " + result.affectedRows);
         });
+    });
+
+app.route('/car')
+    .post(function (req, res, next) {
+        const sql = 'INSERT INTO car SET ?';
+        let { car } = req.body;
+        connection.query(sql, car, function (err, result) {
+            if (err) return res.send(400, err.sqlMessage);
+            car.car_id = result.insertId;
+            initialCars.push(car);
+            io.emit('initial cars', initialCars);
+            res.send('Car added successfully')
+        })
     });
 
 app.route('/auth/google')
@@ -125,19 +155,15 @@ app.get('/', (req, res) => res.send('Working!'));
 // Port 8080 for Google App Engine
 app.set('port', process.env.PORT || 3000);
 
-const server = app.listen(3000, function () {
+server = app.listen(3000, function () {
     console.log('server running on port 3000');
 });
 
-const io = require('socket.io')(server);
-
-let socketCount = 0;
-let initialUsers = [];
+io = require('socket.io')(server);
 
 io.on('connection', function (socket) {
     socketCount++;
-    //console.log('Users connected ' + socketCount);
-    console.log('A user connected')
+    console.log('Users connected ' + socketCount);
     // Let all sockets know how many are connected
     io.sockets.emit('users connected', socketCount);
 
@@ -188,6 +214,7 @@ io.on('connection', function (socket) {
                     };
                     connection.query(sql, values, function (err, result) {
                         if (err) throw err;
+                        user.user_id = result.insertId;
                         initialUsers.push(user);
                         io.emit('initial users', initialUsers);
                     });
@@ -200,23 +227,9 @@ io.on('connection', function (socket) {
         "SELECT * FROM `car`",
         function (error, cars, fields) {
             if (error) throw error;
-            const availableCars = [];
-            for (let i = 0; i < cars.length; i += 1) {
-                const car = cars[i];
-                // legg til if-en i php?
-                if (car.booked === 0) {
-                    const availableCar = {
-                        id: car.car_id,
-                        coordinate: {
-                            latitude: parseFloat(car.latitude),
-                            longitude: parseFloat(car.longitude),
-                        },
-                        regNr: car.reg_number,
-                    };
-                    availableCars.push(availableCar);
-                }
-            }
-            io.emit('initial cars', availableCars);
+            console.log(cars);
+            initialCars = cars;
+            io.emit('initial cars', initialCars);
         });
 
     connection.query(
