@@ -1,13 +1,23 @@
-var passport = require('passport');
-var GoogleTokenStrategy = require('passport-google-token').Strategy;
-var LocalStrategy = require('passport-local').Strategy;
+const passport = require('passport');
+const GoogleTokenStrategy = require('passport-google-token').Strategy;
+const LocalStrategy = require('passport-local').Strategy;
 const connection = require('./database');
-var bcrypt = require('bcrypt-nodejs');
+const LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
+const bcrypt = require('bcrypt-nodejs');
 
 module.exports = function () {
+    passport.use(new LinkedInStrategy({
+        clientID: process.env.LINKEDIN_CLIENT_ID,
+        clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
+        callbackURL: "http://localhost:3000/auth/linkedin/callback",
+        scope: ['r_emailaddress', 'r_basicprofile'],
+    }, function (accessToken, refreshToken, profile, done) {
+        console.log(profile)
+    }));
+
     passport.use(new GoogleTokenStrategy({
             clientID: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         },
         function (accessToken, refreshToken, profile, done) {
             const sql = "SELECT * FROM user WHERE google_id=?";

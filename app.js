@@ -136,6 +136,18 @@ app.route('/auth/google')
         next();
     }, generateToken, sendToken);
 
+app.route('/auth/linkedin')
+    .post(passport.authenticate('linkedin'), function (req, res, next) {
+        if (!req.user) {
+            return res.send(401, 'User Not Authenticated');
+        }
+        req.auth = {
+            id: req.user.user_id,
+            role: req.user.role_id,
+        };
+        next();
+    }, generateToken, sendToken);
+
 app.route('/auth/login')
     .post(passport.authenticate('local-login', {
         session: false,
@@ -227,7 +239,6 @@ io.on('connection', function (socket) {
         "SELECT * FROM `car`",
         function (error, cars, fields) {
             if (error) throw error;
-            console.log(cars);
             initialCars = cars;
             io.emit('initial cars', initialCars);
         });
