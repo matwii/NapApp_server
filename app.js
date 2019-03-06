@@ -131,13 +131,12 @@ app.route('/auth/google')
         req.auth = {
             id: req.user.user_id,
             role: req.user.role_id,
-
         };
         next();
     }, generateToken, sendToken);
 
 app.route('/auth/linkedin')
-    .post(passport.authenticate('linkedin'), function (req, res, next) {
+    .post(passport.authenticate('linkedin-token', {session: false}), function (req, res, next) {
         if (!req.user) {
             return res.send(401, 'User Not Authenticated');
         }
