@@ -79,7 +79,7 @@ module.exports = function () {
     // we are using named strategies since we have one for login and one for signup
     // by default, if there was no name, it would just be called 'local'
     passport.use(
-        'local-login',
+        'local-login-admin',
         new LocalStrategy({
                 // by default, local strategy uses username and password, we will override with email
                 usernameField: 'email',
@@ -101,6 +101,25 @@ module.exports = function () {
                     if (rows[0].role_id !== 1)
                         return done(null, false, {message: 'User is not admin'})
 
+                    // all is well, return successful user
+                    return done(null, rows[0]);
+                });
+            })
+    );
+    passport.use(
+        'local-login-car',
+        new LocalStrategy({
+                // by default, local strategy uses username and password, we will override with email
+                passReqToCallback: true // allows us to pass back the entire request to the callback
+            },
+            async function (req, username, password, done) { // callback with email and password from our form
+                console.log(req, username)
+                connection.query("SELECT car_id FROM car WHERE reg_number = ?", [username], function (err, rows) {
+                    if (err)
+                        return done(err);
+                    if (!rows.length) {
+                        return done(null, false, {message: 'Incorrect registration number.'});
+                    }
                     // all is well, return successful user
                     return done(null, rows[0]);
                 });

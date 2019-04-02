@@ -8,7 +8,7 @@ const passport = require('passport');
 const bcrypt = require('bcrypt-nodejs');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-const {generateToken, sendToken} = require('./utils/token.utils');
+const {generateToken, generateCarToken, sendToken, sendCarToken} = require('./utils/token.utils');
 require('./passport')();
 
 let server;
@@ -61,14 +61,23 @@ app.route('/user/:id')
 
 app.route('/car/:id')
     .put(function (req, res, next) {
-        const sql = "UPDATE car SET latitude=?, longitude=?, booked=? WHERE car_id=?";
-        const {latitude, longitude, booked} = req.body;
-        console.log(latitude, longitude);
-        const {id} = req.params;
-        connection.query(sql, [latitude, longitude, booked, id], function (err, result) {
-            if (err) throw err;
-            res.send("Car booked successfully");
-        });
+        jwt.verify(req.body.token, process.env.JWT_SECRET, function (err, decoded) {
+            const sql = "UPDATE car SET latitude=?, longitude=? WHERE car_id=?";
+            const {latitude, longitude} = req.body;
+            console.log(latitude, longitude);
+            const {id} = req.params;
+            connection.query(sql, [latitude, longitude, id], function (err, result) {
+                if (err) throw err;
+                for (const i in initialCars) {
+                    if (initialCars[i].car_id === id) {
+                        initialCars[i].latitude = latitude;
+                        initialCars[i].longitude = longitude;
+                        break; //Stop this loop, we found it!
+                    }
+                }
+                io.emit('initial cars', initialCars)
+            });
+        })
     });
 
 app.route('/car/:id')
@@ -147,8 +156,8 @@ app.route('/auth/linkedin')
         next();
     }, generateToken, sendToken);
 
-app.route('/auth/login')
-    .post(passport.authenticate('local-login', {
+app.route('/auth/login-admin')
+    .post(passport.authenticate('local-login-admin', {
         session: false,
     }), function (req, res, next) {
         if (!req.user) {
@@ -161,13 +170,29 @@ app.route('/auth/login')
         next();
     }, generateToken, sendToken);
 
+app.route('/auth/login-car')
+    .post(function (req, res, next) {
+        const { regNr } = req.body;
+        connection.query("SELECT car_id FROM car WHERE reg_number = ?", [regNr], function (err, rows) {
+            if (err)
+                return res.status(401).send('Error occured');
+            if (!rows.length) {
+                return res.status(401).send('No car found')
+            }
+            req.auth = {
+                id: rows[0].car_id,
+            };
+            next();
+        })
+    }, generateCarToken, sendCarToken);
+
 app.get('/', (req, res) => res.send('Working!'));
 
 // Port 8080 for Google App Engine
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 8080);
 
-server = app.listen(3000, function () {
-    console.log('server running on port 3000');
+server = app.listen(8080, function () {
+    console.log('server running on port 8080');
 });
 
 io = require('socket.io')(server);
@@ -177,6 +202,10 @@ io.on('connection', function (socket) {
     console.log('Users connected ' + socketCount);
     // Let all sockets know how many are connected
     io.sockets.emit('users connected', socketCount);
+
+    socket.on('error', function(err) {
+        console.log("Client socket error:", err);
+    });
 
     socket.on('disconnect', function () {
         // Decrease the socket count on a disconnect, emit
@@ -248,4 +277,14 @@ io.on('connection', function (socket) {
             if (error) throw error;
             io.emit('initial rides', results);
         })
+
+    socket.on('updateCarPosition', function (car_id, token, latitude, longitude) {
+        const sql = "UPDATE car SET latitude=?, longitude=? WHERE car_id=?";
+        connection.query(sql, [latitude, longitude, car_id], function (err, res) {
+            const foundIndex = initialCars.findIndex(el => el.car_id === car_id);
+            initialCars[foundIndex].latitude = latitude;
+            initialCars[foundIndex].longitude = longitude;
+            io.emit('initial cars', initialCars);
+        })
+    })
 });
