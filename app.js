@@ -16,6 +16,7 @@ let io;
 let socketCount = 0;
 let initialUsers = [];
 let initialCars = [];
+let initialRides = [];
 
 // support parsing of application/json type post data
 app.use(bodyParser.json());
@@ -37,7 +38,7 @@ app.route('/car')
         connection.query(
             "SELECT * FROM `car`",
             function (error, results, fields) {
-                if (error) throw error;
+                if (error) console.log(error);
                 res.send(results);
             }
         )
@@ -92,31 +93,43 @@ app.route('/car/:id')
         })
     });
 
+/**
+ * Adds a new ride to the database.
+ */
 app.route('/ride')
     .post(function (req, res, next) {
         const sql = 'INSERT INTO ride SET ?';
-        const {car_id, user_id, start_latitude, start_longitude, start_time, via_latitude, via_longitude, via_time, end_latitude, end_longitude, end_time} = req.body;
-        const values = {
-            ride_id: null,
-            car_id: car_id,
-            user_id: user_id,
-            start_latitude: start_latitude,
-            start_longitude: start_longitude,
-            start_time: start_time,
-            via_latitude: via_latitude,
-            via_longitude: via_longitude,
-            via_time: via_time,
-            end_latitude: end_latitude,
-            end_longitude: end_longitude,
-            end_time: end_time,
-            booked_time: new Date().toLocaleString()
-        };
-        console.log(req.body);
-        connection.query(sql, values, function (err, result) {
-            if (err) throw err;
-            console.log("successfully added ride");
-            res.send("successfully added ride " + result.affectedRows);
-        });
+        const {car_id, token, start_latitude, start_longitude, start_time, via_latitude, via_longitude, via_time, end_latitude, end_longitude, end_time} = req.body;
+        jwt.verify(token, process.env.JWT_SECRET, function (err, decoded) {
+            const values = {
+                ride_id: null,
+                car_id: car_id,
+                user_id: decoded.id,
+                start_latitude: start_latitude,
+                start_longitude: start_longitude,
+                start_time: start_time,
+                via_latitude: via_latitude,
+                via_longitude: via_longitude,
+                via_time: via_time,
+                end_latitude: end_latitude,
+                end_longitude: end_longitude,
+                booked_time: new Date().toLocaleString(),
+                end_time: end_time,
+                canceled: 0
+            };
+            connection.query(sql, values, function (err, result) {
+                if (err) throw err;
+                const values = {
+                    ride_status_id: null,
+                    ride_id: result.insertId,
+                    status_id: 1,
+                    status_time: new Date().toLocaleString(),
+                    status_details: null
+                };
+                connection.query('INSERT INTO ride_status SET ?',values);
+                res.send("successfully added ride " + result);
+            });
+        })
     });
 
 app.route('/car')
@@ -215,6 +228,24 @@ io.on('connection', function (socket) {
         io.sockets.emit('users connected', socketCount)
     });
 
+    socket.on('bookCar', function (carId, bookedBit) {
+        console.log('BOOKCAR', carId, bookedBit);
+        const sql = "UPDATE car SET booked=? WHERE car_id=?";
+        connection.query(sql, [bookedBit, carId], function (err, res) {
+            const foundIndex = initialCars.findIndex(el => el.car_id === carId);
+            initialCars[foundIndex].booked = bookedBit;
+            io.emit('initial cars', initialCars);
+        })
+    });
+    
+    socket.on('getCarRides', function (carId) {
+        const sql = "SELECT * FROM ride WHERE car_id=?";
+        connection.query(sql, [carId], function (err, res) {
+            initialRides = res;
+            io.emit('car_rides', initialRides);
+        })
+    });
+
     if (socket.handshake.query && socket.handshake.query.token) {
         jwt.verify(socket.handshake.query.token, process.env.JWT_SECRET, function (err, decoded) {
             if (err) return new Error('Authentication error');
@@ -281,6 +312,7 @@ io.on('connection', function (socket) {
     socket.on('updateCarPosition', function (car_id, token, latitude, longitude) {
         const sql = "UPDATE car SET latitude=?, longitude=? WHERE car_id=?";
         connection.query(sql, [latitude, longitude, car_id], function (err, res) {
+            console.log(latitude, longitude)
             const foundIndex = initialCars.findIndex(el => el.car_id === car_id);
             initialCars[foundIndex].latitude = latitude;
             initialCars[foundIndex].longitude = longitude;
