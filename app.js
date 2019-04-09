@@ -242,7 +242,7 @@ io.on('connection', function (socket) {
         const sql = "SELECT * FROM ride WHERE car_id=?";
         connection.query(sql, [carId], function (err, res) {
             initialRides = res;
-            io.emit('car_rides', initialRides);
+            io.emit('car_rides_' + carId, initialRides);
         })
     });
 
@@ -301,13 +301,6 @@ io.on('connection', function (socket) {
             initialCars = cars;
             io.emit('initial cars', initialCars);
         });
-
-    connection.query(
-        "SELECT * FROM `ride`",
-        function (error, results, fields) {
-            if (error) throw error;
-            io.emit('initial rides', results);
-        })
 
     socket.on('updateCarPosition', function (car_id, token, latitude, longitude) {
         const sql = "UPDATE car SET latitude=?, longitude=? WHERE car_id=?";
