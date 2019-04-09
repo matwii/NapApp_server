@@ -113,7 +113,7 @@ app.route('/ride')
                 via_time: via_time,
                 end_latitude: end_latitude,
                 end_longitude: end_longitude,
-                booked_time: new Date().toLocaleString(),
+                booked_time: null,
                 end_time: end_time,
                 canceled: 0
             };
@@ -123,7 +123,7 @@ app.route('/ride')
                     ride_status_id: null,
                     ride_id: result.insertId,
                     status_id: 1,
-                    status_time: new Date().toLocaleString(),
+                    status_time: null,
                     status_details: null
                 };
                 connection.query('INSERT INTO ride_status SET ?',values);
