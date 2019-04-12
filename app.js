@@ -237,19 +237,12 @@ io.on('connection', function (socket) {
             io.emit('initial cars', initialCars);
         })
     });
-    
-    socket.on('getCarRides', function (carId) {
-        const sql = "SELECT * FROM ride WHERE car_id=?";
-        connection.query(sql, [carId], function (err, res) {
-            initialRides = res;
-            io.emit('car_rides_' + carId, initialRides);
-        })
-    });
 
     if (socket.handshake.query && socket.handshake.query.token) {
         jwt.verify(socket.handshake.query.token, process.env.JWT_SECRET, function (err, decoded) {
             if (err) return new Error('Authentication error');
             //Checks to see if the user is admin.
+
             if (decoded.role === 1){
                 connection.query(
                     "SELECT user_id, email, name, role_id, created FROM `user`",
@@ -290,6 +283,15 @@ io.on('connection', function (socket) {
                         io.emit('initial users', initialUsers);
                     });
                 });
+            }
+            if (decoded.id){
+                connection.query(
+                    "SELECT * FROM ride WHERE car_id=?", [decoded.id], function (err, res) {
+                        console.log(decoded.id);
+                        initialRides = res;
+                        io.emit('car_rides_' + decoded.id, initialRides);
+                    }
+                )
             }
         })
     }
