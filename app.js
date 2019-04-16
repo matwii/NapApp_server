@@ -13,6 +13,7 @@ require('./passport')();
 
 let server;
 let io;
+let SOCKET;
 let socketCount = 0;
 let initialUsers = [];
 let initialCars = [];
@@ -48,9 +49,9 @@ app.route('/user/:id')
     .delete(function (req, res, next) {
         jwt.verify(req.body.token, process.env.JWT_SECRET, function (err, decoded) {
             if (err) return new Error('Authentication error');
-            if (decoded.role === 1){
+            if (decoded.role === 1) {
                 const sql = "DELETE FROM user WHERE user_id=?";
-                const { id } = req.params;
+                const {id} = req.params;
                 connection.query(sql, [id], function (err, result) {
                     if (err) res.send('Error');
                     res.send("Car booked successfully");
@@ -126,8 +127,11 @@ app.route('/ride')
                     status_time: null,
                     status_details: null
                 };
-                connection.query('INSERT INTO ride_status SET ?',values);
-                res.send("successfully added ride " + result);
+                connection.query('INSERT INTO ride_status SET ?', values, function (err, res) {
+                    if (err) throw err;
+                    SOCKET.emit('sendRideToCar', result.insertId);
+                    res.send("successfully added ride " + result);
+                });
             });
         })
     });
@@ -135,7 +139,7 @@ app.route('/ride')
 app.route('/car')
     .post(function (req, res, next) {
         const sql = 'INSERT INTO car SET ?';
-        let { car } = req.body;
+        let {car} = req.body;
         connection.query(sql, car, function (err, result) {
             if (err) return res.send(400, err.sqlMessage);
             car.car_id = result.insertId;
@@ -185,7 +189,7 @@ app.route('/auth/login-admin')
 
 app.route('/auth/login-car')
     .post(function (req, res, next) {
-        const { regNr } = req.body;
+        const {regNr} = req.body;
         connection.query("SELECT car_id FROM car WHERE reg_number = ?", [regNr], function (err, rows) {
             if (err)
                 return res.status(401).send('Error occured');
@@ -211,12 +215,13 @@ server = app.listen(8080, function () {
 io = require('socket.io')(server);
 
 io.on('connection', function (socket) {
+    SOCKET = socket;
     socketCount++;
     console.log('Users connected ' + socketCount);
     // Let all sockets know how many are connected
     io.sockets.emit('users connected', socketCount);
 
-    socket.on('error', function(err) {
+    socket.on('error', function (err) {
         console.log("Client socket error:", err);
     });
 
@@ -228,22 +233,12 @@ io.on('connection', function (socket) {
         io.sockets.emit('users connected', socketCount)
     });
 
-    socket.on('bookCar', function (carId, bookedBit) {
-        console.log('BOOKCAR', carId, bookedBit);
-        const sql = "UPDATE car SET booked=? WHERE car_id=?";
-        connection.query(sql, [bookedBit, carId], function (err, res) {
-            const foundIndex = initialCars.findIndex(el => el.car_id === carId);
-            initialCars[foundIndex].booked = bookedBit;
-            io.emit('initial cars', initialCars);
-        })
-    });
-
     if (socket.handshake.query && socket.handshake.query.token) {
         jwt.verify(socket.handshake.query.token, process.env.JWT_SECRET, function (err, decoded) {
             if (err) return new Error('Authentication error');
             //Checks to see if the user is admin.
 
-            if (decoded.role === 1){
+            if (decoded.role === 1) {
                 connection.query(
                     "SELECT user_id, email, name, role_id, created FROM `user`",
                     function (error, results, fields) {
@@ -260,9 +255,9 @@ io.on('connection', function (socket) {
                         io.emit('initial users', initialUsers);
                     })
                 });
-                socket.on('addUser',async function (user) {
+                socket.on('addUser', async function (user) {
                     const sql = 'INSERT INTO user SET ?';
-                    const {name, email, password, role } = user;
+                    const {name, email, password, role} = user;
                     const salt = await bcrypt.genSaltSync(10);
                     const hashedPassword = await bcrypt.hashSync(password, salt);
                     const values = {
@@ -284,10 +279,50 @@ io.on('connection', function (socket) {
                     });
                 });
             }
-            if (decoded.id){
+            if (decoded.id) {
+                socket.on('addRide', (req) => {
+                    console.log(req);
+                    const sql = 'INSERT INTO ride SET ?';
+                    const {car_id, token, start_latitude, start_longitude, start_time, via_latitude, via_longitude, via_time, end_latitude, end_longitude, end_time} = req;
+                    const values = {
+                        ride_id: null,
+                        car_id: car_id,
+                        user_id: decoded.id,
+                        start_latitude: start_latitude,
+                        start_longitude: start_longitude,
+                        start_time: start_time,
+                        via_latitude: via_latitude,
+                        via_longitude: via_longitude,
+                        via_time: via_time,
+                        end_latitude: end_latitude,
+                        end_longitude: end_longitude,
+                        booked_time: null,
+                        end_time: end_time,
+                        canceled: 0
+                    };
+                    connection.query(sql, values, function (err, result) {
+                        if (err) throw err;
+                        const values = {
+                            ride_status_id: null,
+                            ride_id: result.insertId,
+                            status_id: 1,
+                            status_time: null,
+                            status_details: null
+                        };
+                        connection.query('INSERT INTO ride_status SET ?', values, function (err, res) {
+                            if (err) throw err;
+
+                        });
+                    });
+                });
+
                 connection.query(
-                    "SELECT * FROM ride WHERE car_id=?", [decoded.id], function (err, res) {
-                        console.log(decoded.id);
+                    "SELECT r.ride_id, r.start_latitude, r.start_longitude, r.via_latitude, \n" +
+                    "r.via_longitude, r.end_latitude, r.end_longitude, \n" +
+                    "rs.status_id, u.name FROM ride AS r\n" +
+                    "JOIN ride_status AS rs ON r.ride_id=rs.ride_id\n" +
+                    "JOIN user AS u ON r.user_id=u.user_id\n" +
+                    "WHERE r.car_id=? AND (rs.status_id=1 OR rs.status_id=2)", [decoded.id], function (err, res) {
                         initialRides = res;
                         io.emit('car_rides_' + decoded.id, initialRides);
                     }
