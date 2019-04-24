@@ -3,21 +3,19 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
-const connection = require('./database');
 const passport = require('passport');
 const bcrypt = require('bcrypt-nodejs');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const connection = require('./database');
 const {generateToken, generateCarToken, sendToken, sendCarToken} = require('./utils/token.utils');
 require('./passport')();
+const rides = require('./ride');
 
 let server;
 let io;
 let SOCKET;
 let socketCount = 0;
-let initialUsers = [];
-let initialCars = [];
-let initialRides = [];
 
 // support parsing of application/json type post data
 app.use(bodyParser.json());
@@ -60,6 +58,11 @@ app.route('/user/:id')
         })
     });
 
+app.route('/ride')
+    .get(function (req, res) {
+        rides.getUserRides(req, res)
+    });
+
 
 app.route('/car/:id')
     .put(function (req, res, next) {
@@ -91,48 +94,6 @@ app.route('/car/:id')
             initialCars = initialCars.filter(car => car.car_id !== parseInt(id));
             res.send('Car deleted successfully');
             io.emit('initial cars', initialCars);
-        })
-    });
-
-/**
- * Adds a new ride to the database.
- */
-app.route('/ride')
-    .post(function (req, res, next) {
-        const sql = 'INSERT INTO ride SET ?';
-        const {car_id, token, start_latitude, start_longitude, start_time, via_latitude, via_longitude, via_time, end_latitude, end_longitude, end_time} = req.body;
-        jwt.verify(token, process.env.JWT_SECRET, function (err, decoded) {
-            const values = {
-                ride_id: null,
-                car_id: car_id,
-                user_id: decoded.id,
-                start_latitude: start_latitude,
-                start_longitude: start_longitude,
-                start_time: start_time,
-                via_latitude: via_latitude,
-                via_longitude: via_longitude,
-                via_time: via_time,
-                end_latitude: end_latitude,
-                end_longitude: end_longitude,
-                booked_time: null,
-                end_time: end_time,
-                canceled: 0
-            };
-            connection.query(sql, values, function (err, result) {
-                if (err) throw err;
-                const values = {
-                    ride_status_id: null,
-                    ride_id: result.insertId,
-                    status_id: 1,
-                    status_time: null,
-                    status_details: null
-                };
-                connection.query('INSERT INTO ride_status SET ?', values, function (err, res) {
-                    if (err) throw err;
-                    SOCKET.emit('sendRideToCar', result.insertId);
-                    res.send("successfully added ride " + result);
-                });
-            });
         })
     });
 
@@ -215,7 +176,7 @@ server = app.listen(8080, function () {
 io = require('socket.io')(server);
 
 io.on('connection', function (socket) {
-    SOCKET = socket;
+    rides.addRideSocket(socket, io, connection);
     socketCount++;
     console.log('Users connected ' + socketCount);
     // Let all sockets know how many are connected
@@ -237,7 +198,6 @@ io.on('connection', function (socket) {
         jwt.verify(socket.handshake.query.token, process.env.JWT_SECRET, function (err, decoded) {
             if (err) return new Error('Authentication error');
             //Checks to see if the user is admin.
-
             if (decoded.role === 1) {
                 connection.query(
                     "SELECT user_id, email, name, role_id, created FROM `user`",
@@ -280,42 +240,6 @@ io.on('connection', function (socket) {
                 });
             }
             if (decoded.id) {
-                socket.on('addRide', (req) => {
-                    console.log(req);
-                    const sql = 'INSERT INTO ride SET ?';
-                    const {car_id, token, start_latitude, start_longitude, start_time, via_latitude, via_longitude, via_time, end_latitude, end_longitude, end_time} = req;
-                    const values = {
-                        ride_id: null,
-                        car_id: car_id,
-                        user_id: decoded.id,
-                        start_latitude: start_latitude,
-                        start_longitude: start_longitude,
-                        start_time: start_time,
-                        via_latitude: via_latitude,
-                        via_longitude: via_longitude,
-                        via_time: via_time,
-                        end_latitude: end_latitude,
-                        end_longitude: end_longitude,
-                        booked_time: null,
-                        end_time: end_time,
-                        canceled: 0
-                    };
-                    connection.query(sql, values, function (err, result) {
-                        if (err) throw err;
-                        const values = {
-                            ride_status_id: null,
-                            ride_id: result.insertId,
-                            status_id: 1,
-                            status_time: null,
-                            status_details: null
-                        };
-                        connection.query('INSERT INTO ride_status SET ?', values, function (err, res) {
-                            if (err) throw err;
-
-                        });
-                    });
-                });
-
                 connection.query(
                     "SELECT r.ride_id, r.start_latitude, r.start_longitude, r.via_latitude, \n" +
                     "r.via_longitude, r.end_latitude, r.end_longitude, \n" +
@@ -330,6 +254,8 @@ io.on('connection', function (socket) {
             }
         })
     }
+
+
 
     connection.query(
         "SELECT * FROM `car`",
