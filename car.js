@@ -6,5 +6,14 @@ module.exports = {
             initialCars[foundIndex].booked = bookedBit;
             io.emit('initial cars', initialCars);
         });
+    },
+    getCars: function (connection, io) {
+        connection.query(
+            "SELECT * FROM `car`",
+            function (error, cars, fields) {
+                if (error) throw error;
+                initialCars = cars;
+                io.emit('initial cars', initialCars);
+            });
     }
 };

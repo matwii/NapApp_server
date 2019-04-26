@@ -11,6 +11,7 @@ const connection = require('./database');
 const {generateToken, generateCarToken, sendToken, sendCarToken} = require('./utils/token.utils');
 require('./passport')();
 const rides = require('./ride');
+const cars = require('./car');
 
 let server;
 let io;
@@ -60,7 +61,7 @@ app.route('/user/:id')
 
 app.route('/ride')
     .get(function (req, res) {
-        rides.getUserRides(req, res)
+        rides.getUserRides(req, res, connection, io)
     });
 
 
@@ -177,6 +178,8 @@ io = require('socket.io')(server);
 
 io.on('connection', function (socket) {
     rides.addRideSocket(socket, io, connection);
+    cars.getCars(connection, io)
+    rides.updateRide(socket, io, connection)
     socketCount++;
     console.log('Users connected ' + socketCount);
     // Let all sockets know how many are connected
@@ -256,14 +259,6 @@ io.on('connection', function (socket) {
     }
 
 
-
-    connection.query(
-        "SELECT * FROM `car`",
-        function (error, cars, fields) {
-            if (error) throw error;
-            initialCars = cars;
-            io.emit('initial cars', initialCars);
-        });
 
     socket.on('updateCarPosition', function (car_id, token, latitude, longitude) {
         const sql = "UPDATE car SET latitude=?, longitude=? WHERE car_id=?";
