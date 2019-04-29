@@ -66,8 +66,10 @@ module.exports = {
                    "JOIN ride_status AS rs ON r.ride_id=rs.ride_id\n" +
                    "JOIN user AS u ON r.user_id=u.user_id\n" +
                    "WHERE r.car_id=? AND (rs.status_id=1 OR rs.status_id=2)", [car_id], function (err, res) {
-                       initialRides = res;
-                       console.log(res);
+                       res ? initialRides = res : initialRides = [];
+                       if (status_id === 3 || status_id === 4){
+                           cars.changeCarStatus(connection, 0, car_id, io);
+                       }
                        io.emit('car_rides_' + car_id, initialRides);
                    }
                )
@@ -83,7 +85,6 @@ module.exports = {
                 "INNER JOIN car AS c ON r.car_id=c.car_id WHERE r.user_id=?";
             connection.query(sql, [decoded.id], function (err, result) {
                 if (err) res.send('ERROR');
-                console.log(result)
                 io.emit('initial cars', initialCars)
                 res.send(result);
             })
